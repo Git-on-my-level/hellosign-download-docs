@@ -1,9 +1,11 @@
 require "rubygems"
 require "bundler/setup"
-require 'hello_sign'
+require "hello_sign"
+
+API_KEY = "YOUR_API_KEY"
 
 def initiate_client
-    HelloSign::Client.new :api_key => 'YOUR_API_KEYS'
+    HelloSign::Client.new :api_key => API_KEY
 end
 
 def get_total_pages(client)
@@ -33,11 +35,14 @@ def download_requests(client, requests)
                 file_type: "pdf",
             )
 
-            File.open("downloads/#{req["original_title"]}.pdf", "wb") do |file|
+            File.open(File.join("downloads", "#{req["original_title"].gsub(/[\x00\/\*\?\|]/, '_')}.pdf"), "wb") do |file|
                 file.write(download)
             end
-        rescue 
-            puts "Could not download for id: %%" % req["signature_request_id"]
+        rescue => error
+            puts "Could not download for id: %s" % req["signature_request_id"]
+            puts req
+            puts error
+            puts ""
         end
     end
 end
